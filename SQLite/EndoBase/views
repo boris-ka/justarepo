@@ -1,0 +1,51 @@
+CREATE VIEW WORKOUTS as
+-- drop view if exists WORKOUTS;
+select id, sport, distance as Dist, duration as Dur,
+datetime(starttime/1000000-62168245200, 'unixepoch') as begin, 
+datetime(starttime/1000000-62168245200, 'unixepoch') as end 
+from workout;
+
+CREATE VIEW TRACKS as
+-- drop view if exists TRACKS;
+select datetime(timestamp/1000000-62168245200, 'unixepoch'), 
+instruction, workoutid from trackpoint
+where instruction > 0;
+
+
+
+CREATE VIEW WrkDates as
+-- drop view if exists WrkDates;
+select workoutId, sport, workout.distance as Dist, duration as Dur,
+strftime("%m/%d %H:%M:%S", starttime/1000000-62168245200, 'unixepoch') as begin, 
+strftime("%H:%M:%S", timestamp/1000000-62168245200, 'unixepoch') as end 
+from workout
+left join TrackPoint
+on workoutId = workout.id
+where 
+instruction=4;
+
+
+CREATE VIEW WrkOutLong as
+-- drop view if exists WrkOutLong;
+select workoutId, sport, workout.distance as Dist, duration as Dur,
+strftime("%m/%d %H:%M:%S", starttime/1000000-62168245200, 'unixepoch') as begin, 
+strftime("%H:%M:%S", timestamp/1000000-62168245200, 'unixepoch') as end 
+from workout
+left join TrackPoint
+on workoutId = workout.id
+where 
+dur > 3600 and
+instruction=4;
+
+
+CREATE VIEW WrkOutShort as
+-- drop view if exists WrkOutShort;
+select workoutId, sport, workout.distance as Dist, duration as Dur,
+strftime("%m/%d %H:%M:%S", starttime/1000000-62168245200, 'unixepoch') as begin, 
+strftime("%H:%M:%S", timestamp/1000000-62168245200, 'unixepoch') as end 
+from workout
+left join TrackPoint
+on workoutId = workout.id
+where 
+dur <= 3600 and
+instruction=4;
