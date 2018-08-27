@@ -1,0 +1,63 @@
+#( clipboard-regex-replace
+\	берёт и буфера обмена текст, описанный как java-поле:
+
+\    /* Номер счёта сопровождения */
+\    private String supportAccountNumber;
+
+\    /**
+\     * Количество автопролонгаций
+\     */
+\    private Long autoProlongationsNumber;
+
+\    /* Таблица типов счетов доступные в качестве счета сопровождения */
+\    private List<AccountType> supportAccountTypes = new ArrayList<>();
+
+
+\	и преобразует его в текст, пригодный в качестве property для swagger:
+
+\      supportAccountNumber:
+\        type: string
+\        description: Номер счёта сопровождения
+
+WatchHotKey: "{0xC}"
+CREATE javaType 1024 ALLOT
+CREATE javaName 1024 ALLOT
+CREATE javaDescr 1024 ALLOT
+Action:
+\	GetForegroundWindow
+WIN-ACTIVE: "{97E27FAA-C0B3-4b8e-A693-ED7881E99FC1}"
+NOT IF	\ foobar v 1.4
+
+	700 500 BEEP
+\	RE-MATCH: "%CLIPBOARD%" "/\/\* (.*?) \*\/\s+private ((LocalDate)|(BigDecimal)|(String)|(boolean)|([a-zA-Z]+)) +([a-zA-Z]+);?/"
+	RE-MATCH: "%CLIPBOARD%" "/\/\*[\r\n \t*]*(.*?)[\r\n \t*]*\*\/\s+private ((LocalDate)|(BigDecimal)|(String)|([lL]ong)|(boolean)|([a-zA-Z]+)) +([a-zA-Z]+);?/"
+	IF
+	800 1800 BEEP
+\	TMSG: "%$8%:%CRLF%type: %$2%%CRLF%description: %$1%" 5
+	S" %$1%" EVAL-SUBST javaDescr PLACE
+	S" %$9%" EVAL-SUBST javaType PLACE
+	S" type: %$2%" EVAL-SUBST javaType PLACE	\ там, где тип не требуется "приводить"; сейчас это boolean
+	S" " S" %$6%" EVAL-SUBST COMPARE 0= NOT IF S" type: integer%CRLF%        format: int64" EVAL-SUBST javaType PLACE THEN
+	S" " S" %$8%" EVAL-SUBST COMPARE 0= NOT IF S" $ref: '#/definitions/%$2%'" EVAL-SUBST javaType PLACE THEN
+	S" String" S" %$2%" EVAL-SUBST COMPARE 0= IF S" type: string" javaType PLACE THEN
+	S" LocalDate" S" %$2%" EVAL-SUBST COMPARE 0= IF S" type: string%CRLF%        format: date" EVAL-SUBST javaType PLACE THEN
+	S" BigDecimal" S" %$2%" EVAL-SUBST COMPARE 0= IF S" type: number" javaType PLACE THEN
+\	CLIPBOARD: "%$7%:%CRLF%  type: %$2%%CRLF%  description: %$1%"
+\	TMSG: "%$8%:%CRLF%        %javaType COUNT%%CRLF%        description: %$1%" 5
+	CLIPBOARD: "      %$9%:%CRLF%        %javaType COUNT%%CRLF%        description: %$1%%CRLF%"
+	800 1800 BEEP
+	THEN
+
+	\ для списков: private List<AccountType> supportAccountTypes = new ArrayList<>();
+	RE-MATCH: "%CLIPBOARD%" "/\/\*[\r\n \t*]*(.*?)[\r\n \t*]*\*\/\s+private List<([a-zA-Z]+)> +([a-zA-Z]+) = new ArrayList<>\(\);/"
+	IF
+	800 1800 BEEP
+\	TMSG: "%$8%:%CRLF%type: %$2%%CRLF%description: %$1%" 5
+	S" %$1%" EVAL-SUBST javaDescr PLACE
+	S" %$2%" EVAL-SUBST javaType PLACE
+	S" type: array%CRLF%        items:%CRLF%          $ref: '#/definitions/%$2%'" EVAL-SUBST javaType PLACE
+	CLIPBOARD: "      %$3%:%CRLF%        %javaType COUNT%%CRLF%        description: %$1%%CRLF%"
+	800 1800 BEEP
+	THEN
+THEN
+)#
