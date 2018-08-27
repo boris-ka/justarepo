@@ -29,7 +29,12 @@ WIN-ACTIVE: "{97E27FAA-C0B3-4b8e-A693-ED7881E99FC1}"
 NOT IF	\ foobar v 1.4
 
 	700 500 BEEP
+	\ для простых полей: private String supportAccount;
 \	RE-MATCH: "%CLIPBOARD%" "/\/\* (.*?) \*\/\s+private ((LocalDate)|(BigDecimal)|(String)|(boolean)|([a-zA-Z]+)) +([a-zA-Z]+);?/"
+\ для использования вертикальной черты ... ((LocalDate)|(BigDecimal)|(String)|...)
+\ нужно отдельные области заключать в скобки - (LocalDate), (BigDecimal) и т.д.
+\ неясно, как использовать метасимвол "точка" в том числе для переводов строк
+\ поэтому использую вместо точки неуклюжую конструкцию [\r\n \t*]
 	RE-MATCH: "%CLIPBOARD%" "/\/\*[\r\n \t*]*(.*?)[\r\n \t*]*\*\/\s+private ((LocalDate)|(BigDecimal)|(String)|([lL]ong)|(boolean)|([a-zA-Z]+)) +([a-zA-Z]+);?/"
 	IF
 	800 1800 BEEP
@@ -48,7 +53,7 @@ NOT IF	\ foobar v 1.4
 	800 1800 BEEP
 	THEN
 
-	\ для списков: private List<AccountType> supportAccountTypes = new ArrayList<>();
+	\ для полей-списков: private List<AccountType> supportAccountTypes = new ArrayList<>();
 	RE-MATCH: "%CLIPBOARD%" "/\/\*[\r\n \t*]*(.*?)[\r\n \t*]*\*\/\s+private List<([a-zA-Z]+)> +([a-zA-Z]+) = new ArrayList<>\(\);/"
 	IF
 	800 1800 BEEP
